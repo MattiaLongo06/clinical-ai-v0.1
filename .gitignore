@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environments
+.venv/
+env/
+venv/
+
+# Streamlit cache
+.streamlit/
+
+# Data / artifacts
+data/
+models/*.pt
+models/*.pth
+
+# OS
+.DS_Store
+Thumbs.db

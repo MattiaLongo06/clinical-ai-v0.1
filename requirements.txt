@@ -1,0 +1,9 @@
+torch
+torchvision
+streamlit
+pydicom
+opencv-python-headless
+pillow
+numpy
+pandas
+pytorch-grad-cam
