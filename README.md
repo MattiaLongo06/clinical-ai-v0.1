@@ -1,48 +1,69 @@
 # Clinical Imaging v0.1 — Grad-CAM Demo (NOT FOR CLINICAL USE)
 
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)
-![Framework](https://img.shields.io/badge/framework-Streamlit-brightgreen)
-![Model](https://img.shields.io/badge/model-ResNet18-orange)
-[![Live Demo](https://img.shields.io/badge/HuggingFace-Live%20Demo-yellow)]## Screenshots
-
-**Upload DICOM & UI**
-<p align="center">
-  <img src="assets/screenshotOverlay.png" alt="Clinical Imaging — upload DICOM screen" width="800">
-</p>
-
-**Grad‑CAM overlay (demo)**
-<p align="center">
-  <img src="assets/screenshotSidebar.png" alt="Clinical Imaging — Grad-CAM overlay on chest image" width="800">
-</p>
-
-
-**What:**  
-Upload a chest image (PNG, JPG, DICOM) → see a toy prediction + a Grad-CAM heatmap overlay showing where the model “looked”.
-
-**Why:**  
-Demonstrates ability to:
-- Handle **DICOM medical images** via `pydicom`
-- Run **PyTorch CNN inference** on CPU
-- Generate **explainable AI visualizations** with Grad-CAM
-- Build a **clean, reproducible UI** for healthcare using Streamlit
-- Save patient demo metadata (CSV/SQLite-ready)
-- Package and deploy on Hugging Face Spaces (no install required)
-
-⚠ **Disclaimer:** Educational demo only — not a medical device. No diagnostic use.
+**What:** Upload a chest image (PNG/JPG/DICOM) → get a toy prediction + a Grad-CAM heatmap showing where the model “looked”.  
+**Why (for recruiters):** Demonstrates handling of medical imaging formats (DICOM), AI model inference, and visual explainability in a clean, reproducible app.
 
 ---
 
 ## 🚀 Quick start
 
-### **1. Online demo**
-👉 [**Click here to try**](<link-spaces>)
+**Online demo:** _TBD (Hugging Face Spaces link)_  
+**GitHub repo:** [Clinical AI v0.1](<repo-link>)
 
-### **2. Local**
+### Run locally
 ```bash
-git clone <https://github.com/MattiaLongo06/clinical-ai-v0.1>
-cd clinical-ai-v0.1
 conda create -n clinical-ai-v0_1 python=3.11 -y
 conda activate clinical-ai-v0_1
 pip install -r requirements.txt
 streamlit run app.py
+
+Features
+DICOM support — load .dcm files via pydicom with basic windowing.
+
+Pretrained CNN inference (ResNet18, ImageNet weights, CPU-friendly).
+
+Grad-CAM explainability with adjustable opacity slider.
+
+Optional patient metadata (age, sex, symptoms) saved to CSV.
+
+Export overlay as PNG for sharing or documentation.
+
+Clean, medical-style UI with custom Streamlit theme.
+
+Screenshots
+Grad-CAM Overlay on Chest DICOM (Demo)
+
+<p align="center"> <img src="assets/screenshotOverlay.png" alt="Grad-CAM overlay on chest DICOM" width="800"> </p>
+Patient Metadata & Controls (Sidebar)
+
+<p align="center"> <img src="assets/screenshotSidebar.png" alt="Sidebar with patient metadata and visualization controls" width="800"> </p>
+Limitations
+Toy prediction only (brightness-based) — not for clinical use.
+
+No diagnostic claims.
+
+Educational and portfolio purposes only.
+
+Tech stack
+Frontend/UI: Streamlit (custom CSS theme)
+
+Model: PyTorch + torchvision (ResNet18)
+
+Explainability: torchcam (Grad-CAM)
+
+Medical imaging: pydicom
+
+Image processing: Pillow, OpenCV
+
+Data storage: CSV via pandas
+
+Roadmap
+v0.2: Fine-tuned chest X-ray CNN, Docker deploy.
+
+v0.3: Segmentation (U-Net) + FHIR API integration.
+
+v0.4: MLflow tracking, calibration, and external validation.
+
+Author
+Developed by Mattia Lorenzo Longo as part of a long-term Clinical AI Engineer career plan.
+
