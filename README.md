@@ -53,7 +53,7 @@ streamlit run app.py
 
 ---
 
-## Limitatios
+## Limitations
 
 - **Toy prediction** only (brightness-based) — not for clinical use.
 - **No diagnostic claims.**
