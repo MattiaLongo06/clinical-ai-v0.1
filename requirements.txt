@@ -1,9 +1,19 @@
-torch
-torchvision
-streamlit
-pydicom
-opencv-python-headless
-pillow
-numpy
-pandas
-pytorch-grad-cam
+# Core AI/ML
+torch==2.2.2
+torchvision==0.17.2
+torchcam==0.4.0
+
+# App framework
+streamlit==1.36.0
+
+# Medical imaging
+pydicom==2.4.4
+
+# Image processing
+opencv-python-headless==4.9.0.80
+pillow==10.3.0
+numpy==1.26.4
+pandas==2.2.2
+
+# (Optional) for reproducibility and compatibility
+typing-extensions==4.12.2
