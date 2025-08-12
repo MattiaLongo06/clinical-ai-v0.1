@@ -1,4 +1,7 @@
 # app.py — Clinical Imaging v0.1 (medical UI)
+
+import os
+os.environ["STREAMLIT_CONFIG_DIR"] = "/app/.streamlit"
 import io
 import numpy as np
 from PIL import Image
