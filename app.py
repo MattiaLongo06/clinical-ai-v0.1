@@ -1,19 +1,17 @@
-# app.py — Clinical Imaging v0.1 (medical UI)
-
 import os
 os.environ["STREAMLIT_CONFIG_DIR"] = "/app/.streamlit"
+
 import io
 import numpy as np
 from PIL import Image
-
-import streamlit as st
-import torch
-from torchvision import models
-from torchcam.methods import GradCAM
 import cv2
+import streamlit as st
 
-from src.io_dicom import load_dicom_to_pil   # DICOM -> PIL
-from src.storage import save_patient_row     # autosave CSV
+from src.io_dicom import load_dicom_to_pil          # DICOM -> PIL
+from src.storage import save_patient_row            # autosave CSV
+from src.preprocessing import to_numpy, prepare_input
+from src.inference import load_imagenet_resnet18, toy_prob_from_brightness
+from src.explain import gradcam_heatmap, make_overlay
 
 
 # -----------------------------
@@ -114,33 +112,11 @@ with left:
 
 
 # -----------------------------
-# Utils
+# Model cache
 # -----------------------------
 @st.cache_resource
-def load_model():
-    weights = models.ResNet18_Weights.IMAGENET1K_V1
-    model = models.resnet18(weights=weights)
-    model.eval()
-    return model, weights
-
-def to_numpy(img: Image.Image, size=None) -> np.ndarray:
-    if size:
-        img = img.resize(size)
-    arr = np.array(img.convert("RGB")).astype(np.float32) / 255.0
-    return arr
-
-def make_overlay(rgb_float01: np.ndarray, cam_float01: np.ndarray, alpha_overlay: float) -> Image.Image:
-    cam_uint8 = (np.clip(cam_float01, 0, 1) * 255).astype(np.uint8)
-    heatmap_bgr = cv2.applyColorMap(cam_uint8, cv2.COLORMAP_JET)
-    heatmap_rgb = cv2.cvtColor(heatmap_bgr, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
-    blended = (1 - alpha_overlay) * rgb_float01 + alpha_overlay * heatmap_rgb
-    blended = np.clip(blended, 0, 1)
-    return Image.fromarray((blended * 255).astype(np.uint8))
-
-def toy_prob_from_brightness(pil_img: Image.Image) -> float:
-    gray = pil_img.convert("L")
-    mean_pix = np.array(gray).mean() / 255.0
-    return float(1.0 - mean_pix)
+def get_model():
+    return load_imagenet_resnet18(device="cpu")
 
 
 # -----------------------------
@@ -150,6 +126,7 @@ if uploaded_file is None:
     with left:
         st.info("Upload an image to begin (ideally a chest X-ray).")
 else:
+    # Load image (PNG/JPG/DICOM)
     try:
         if uploaded_file.name.lower().endswith(".dcm"):
             image = load_dicom_to_pil(uploaded_file)
@@ -171,35 +148,22 @@ else:
                 st.warning(f"Could not save patient data: {e}")
 
     # Model + preprocessing
-    model, weights = load_model()
-    transform = weights.transforms()
-    input_tensor = transform(image).unsqueeze(0)
-    input_tensor.requires_grad_(True)
+    model, weights = get_model()
+    input_tensor = prepare_input(image, weights=weights)
 
     # Grad-CAM
     cam_img = None
     try:
-        with GradCAM(model, target_layer="layer4") as cam_extractor:
-            scores = model(input_tensor)
-            class_idx = int(scores.argmax(dim=1).item())
-            cams = cam_extractor(class_idx, scores)
-
-        cam = cams[0].squeeze().detach().cpu().numpy()
-        cam = cam - cam.min()
-        cam = cam / (cam.max() + 1e-8)
+        cam = gradcam_heatmap(model, input_tensor, target_layer="layer4")
         cam_resized = cv2.resize(cam, image.size, interpolation=cv2.INTER_LINEAR)
-
         base_np = to_numpy(image, size=image.size)
         cam_img = make_overlay(base_np, cam_resized, alpha_overlay=alpha)
-
     except Exception as e:
         with right:
             st.warning(f"Grad-CAM not available for this image: {e}")
 
     # Prediction (toy)
-    p_pneumonia = toy_prob_from_brightness(image)
-    p_normal = 1.0 - p_pneumonia
-    label = "Pneumonia (toy)" if p_pneumonia >= 0.5 else "Normal (toy)"
+    p_normal, p_pneumonia, label = toy_prob_from_brightness(image)
 
     # Display results
     with left:
